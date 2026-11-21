@@ -1,8 +1,11 @@
-# Push a tag such as v0.1.5 to publish a release.
-# The release carries module.json (the manifest Foundry installs from) and module.zip.
+# Publish a GitHub release named after the version (for example v0.1.5), or push that tag.
+# This workflow then attaches module.json (the manifest Foundry installs from) and module.zip,
+# and fills the release notes from that version's README entry.
 name: Release
 
 on:
+  release:
+    types: [published]
   push:
     tags: ["v*"]
 
@@ -36,6 +39,7 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
           body_path: notes.md
           files: |
