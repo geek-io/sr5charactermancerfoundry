@@ -1,0 +1,567 @@
+<div class="sr5cm-wrap">
+  <nav class="sr5cm-nav">
+    <div class="sr5cm-brand">THE SHADOWS<br><span>CHARACTERMANCER</span></div>
+    <ol>
+      {{#each steps}}
+      <li class="{{#if active}}active{{/if}}"><a data-action="goStep" data-step="{{key}}"><i class="{{icon}}"></i><span>{{n}}. {{label}}</span></a></li>
+      {{/each}}
+    </ol>
+    <button type="button" class="sr5cm-reset" data-action="saveToChat" data-tooltip="Post this build to chat. Anyone can open a copy of it from the chat card."><i class="fa-solid fa-floppy-disk"></i> Save to chat</button>
+    <button type="button" class="sr5cm-reset" data-action="resetBuild" data-tooltip="Discard this build and start a new character"><i class="fa-solid fa-rotate-left"></i> Start over</button>
+  </nav>
+
+  <section class="sr5cm-main">
+
+  {{!-- ============================================================ CONCEPT --}}
+  {{#if step_concept}}
+    <h2>Concept &amp; Method</h2>
+    <div class="sr5cm-concept">
+      <img class="sr5cm-portrait" src="{{img}}" data-action="pickImage" data-tooltip="Click to choose a portrait">
+      <div class="sr5cm-fields">
+        <label>Name <input type="text" data-path="name" value="{{st.name}}" placeholder="Street name"></label>
+        <label>Concept <textarea data-path="concept" rows="3" placeholder="Face, decker, street samurai, technomancer…">{{st.concept}}</textarea></label>
+      </div>
+    </div>
+    <h3>Creation method</h3>
+    <div class="sr5cm-cards">
+      {{#each methods}}
+      <label class="sr5cm-card {{#if selected}}selected{{/if}}" data-tooltip="{{desc}}">
+        <input type="radio" name="method" data-path="method" value="{{key}}" {{#if selected}}checked{{/if}}>
+        <strong>{{label}}</strong><p>{{desc}}</p>
+      </label>
+      {{/each}}
+    </div>
+    <h3>Gameplay level</h3>
+    <div class="sr5cm-cards">
+      {{#each levels}}
+      <label class="sr5cm-card {{#if selected}}selected{{/if}}" data-tooltip="{{detail}}">
+        <input type="radio" name="level" data-path="level" value="{{key}}" {{#if selected}}checked{{/if}}>
+        <strong>{{label}}</strong><p>{{detail}}</p>
+      </label>
+      {{/each}}
+    </div>
+    <p class="hint">Every method gets free Knowledge/Language points ((Intuition + Logic) × 2) and free Contact Karma (Charisma × 3, or × 6 for Prime Runners). Run Faster p.62.</p>
+  {{/if}}
+
+  {{!-- ============================================================ METATYPE --}}
+  {{#if step_metatype}}
+    {{#if isPriority}}
+      <h2>Priorities {{#if sumToTen}}<small>Sum to Ten: {{c.sumToTen}}/10 points</small>{{/if}}</h2>
+      <table class="sr5cm-priority">
+        <thead><tr><th>Priority</th>{{#each columns}}<th>{{label}}</th>{{/each}}</tr></thead>
+        <tbody>
+          {{#each grid}}
+          <tr>
+            <th>{{level}}{{#if ../sumToTen}} <small>({{cost}})</small>{{/if}}</th>
+            {{#each cells}}
+            <td class="{{#if selected}}selected{{/if}} {{#if taken}}taken{{/if}}" data-action="setPriority" data-col="{{col}}" data-level="{{level}}" data-tooltip="{{tip}}">{{text}}</td>
+            {{/each}}
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+      <p class="hint">Click a cell to assign that priority to the column.{{#if sumToTen}} Levels may repeat; each column is chosen once.{{else}} Each level is used once.{{/if}}</p>
+    {{/if}}
+    <h2>Metatype</h2>
+    {{#each metaGroups}}
+      <h3>{{group}}</h3>
+      <div class="sr5cm-cards small">
+        {{#each list}}
+        <label class="sr5cm-card {{#if selected}}selected{{/if}} {{#unless available}}disabled{{/unless}}" data-tooltip-html="{{tipHtml}}">
+          <input type="radio" name="metatype" data-path="metatype" value="{{key}}" {{#if selected}}checked{{/if}}>
+          <strong>{{label}}</strong><p>{{detail}}</p>
+        </label>
+        {{/each}}
+      </div>
+    {{/each}}
+    <div class="sr5cm-box">
+      <h3>{{meta.label}}</h3>
+      <table class="sr5cm-mini"><tr>{{#each metaAttrs}}<th>{{label}}</th>{{/each}}</tr><tr>{{#each metaAttrs}}<td>{{min}}/{{max}}</td>{{/each}}</tr></table>
+      {{#if meta.traits.length}}<p><strong>Racial traits:</strong> {{#each meta.traits}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>{{/if}}
+      {{#if c.metaKarma}}<p><strong>Karma cost:</strong> {{c.metaKarma}}</p>{{/if}}
+      {{#if isPriority}}<p><strong>Special attribute points:</strong> {{c.specialPts}}</p>{{/if}}
+    </div>
+  {{/if}}
+
+  {{!-- ============================================================ LIFE MODULES --}}
+  {{#if step_lifeModules}}
+    <h2>Life Modules <small>{{lm.karma}} Karma in modules</small></h2>
+    {{#each stages}}
+    <div class="sr5cm-stage">
+      <h3>{{label}}</h3>
+      <p class="hint">{{note}}</p>
+      {{#each instances}}
+      <div class="sr5cm-module">
+        <header>
+          <strong>{{name}}</strong> <span class="tag" data-tooltip="Karma cost and page in Run Faster">{{karma}} Karma · p.{{page}}</span>
+          <a class="remove" data-action="removeRow" data-list="lifeModules.{{stage}}" data-index="{{index}}" title="Remove"><i class="fa-solid fa-trash"></i></a>
+        </header>
+        {{#if note}}<p class="hint">{{note}}</p>{{/if}}
+        {{#if options}}
+        <label class="inline">{{optionLabel}}
+          <select data-path="{{base}}.option">
+            <option value="">— choose —</option>
+            {{#each options}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}
+          </select>
+        </label>
+        {{/if}}
+        {{#if regionLanguages}}
+        <div class="sr5cm-row">
+          <label class="inline">Native language <select data-path="{{base}}.native"><option value="">—</option>{{#each nativeOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{value}}</option>{{/each}}</select></label>
+          <label class="inline">Secondary (1) <select data-path="{{base}}.secondary"><option value="">—</option>{{#each secondaryOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{value}}</option>{{/each}}</select></label>
+        </div>
+        {{/if}}
+        <ul class="grants">{{#each grants}}<li>{{this}}</li>{{/each}}</ul>
+        {{#if placeholders.length}}
+        <div class="sr5cm-fills">
+          {{#each placeholders}}<label>{{label}} <input type="text" data-path="{{path}}" value="{{value}}" placeholder="Name it"></label>{{/each}}
+        </div>
+        {{/if}}
+        {{#each choices}}
+        <div class="sr5cm-choice">
+          <span class="label">{{label}}</span>
+          {{#if selects}}{{#each selects}}
+            <select data-path="{{path}}"><option value="">—</option>{{#each options}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+          {{/each}}{{/if}}
+          {{#if is_skillPoints}}
+            <span class="tag">{{used}}/{{points}} (max {{maxEach}} each)</span>
+            {{#each rows}}
+            <div class="sr5cm-row">
+              <select data-path="{{path}}.skill"><option value="">—</option>{{#each options}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+              <input type="number" min="0" data-dtype="Number" data-path="{{path}}.n" value="{{n}}">
+              <a data-action="removeRow" data-list="{{../path}}" data-index="{{j}}"><i class="fa-solid fa-xmark"></i></a>
+            </div>
+            {{/each}}
+            <button type="button" data-action="addRow" data-list="{{path}}" data-kind="skillPoints"><i class="fa-solid fa-plus"></i> Skill</button>
+          {{/if}}
+          {{#if is_knowledgePoints}}
+            <span class="tag">{{used}}/{{points}} (max {{maxEach}} each)</span>
+            {{#each rows}}
+            <div class="sr5cm-row">
+              <input type="text" data-path="{{path}}.name" value="{{name}}" placeholder="Subject">
+              <input type="number" min="0" data-dtype="Number" data-path="{{path}}.n" value="{{n}}">
+              <a data-action="removeRow" data-list="{{../path}}" data-index="{{j}}"><i class="fa-solid fa-xmark"></i></a>
+            </div>
+            {{/each}}
+            <button type="button" data-action="addRow" data-list="{{path}}" data-kind="knowledgePoints"><i class="fa-solid fa-plus"></i> Subject</button>
+          {{/if}}
+        </div>
+        {{/each}}
+      </div>
+      {{/each}}
+      {{#if canAdd}}
+      <div class="sr5cm-row">
+        <select data-add-module="{{key}}"><option value="">— add a {{label}} module —</option>{{#each available}}<option value="{{id}}" {{#if taken}}disabled{{/if}}>{{name}}</option>{{/each}}</select>
+        <button type="button" data-action="addModule" data-stage="{{key}}"><i class="fa-solid fa-plus"></i> Add</button>
+      </div>
+      {{/if}}
+    </div>
+    {{/each}}
+    {{#if lm.qualities.length}}
+    <div class="sr5cm-box"><strong>Qualities from your modules:</strong> {{#each lm.qualities}}{{name}} ({{karma}}){{#unless @last}}, {{/unless}}{{/each}}
+      <p class="hint">Module qualities are included in the module cost. The highest-value SIN replaces the others. You can buy off negative qualities with Karma on the Qualities step.</p></div>
+    {{/if}}
+  {{/if}}
+
+  {{!-- ============================================================ MAGIC --}}
+  {{#if step_magic}}
+    <h2>Magic or Resonance</h2>
+    <div class="sr5cm-cards small">
+      {{#each awTypes}}
+      <label class="sr5cm-card {{#if selected}}selected{{/if}} {{#unless available}}disabled{{/unless}}" data-tooltip="{{detail}}">
+        <input type="radio" name="awakened" data-path="awakened" value="{{key}}" {{#if selected}}checked{{/if}}>
+        <strong>{{label}}</strong><p>{{detail}}</p>
+      </label>
+      {{/each}}
+    </div>
+    {{#if isMagic}}
+      <label class="inline">Tradition
+        <select data-path="tradition">{{#each traditionGroups}}<optgroup label="{{group}}">{{#each list}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</optgroup>{{/each}}</select>
+      </label>
+      {{#if isCustomTradition}}<label class="inline">Drain: Willpower +
+        <select data-path="customDrain">{{#each drainOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>{{/if}}
+    {{/if}}
+    {{#if freeSkillSlots.length}}
+      <div class="sr5cm-box"><strong>Free skills at rating {{row.skills.rating}}:</strong>
+        {{#each freeSkillSlots}}<select data-path="{{path}}"><option value="">—</option>{{#each options}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>{{/each}}
+      </div>
+    {{/if}}
+    {{#if groupOptions}}
+      <div class="sr5cm-box"><strong>Aspected skill group (rating {{row.group.rating}}):</strong>
+        <select data-path="magicFree.group"><option value="">—</option>{{#each groupOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+        <p class="hint">An aspected magician may never take skills from the other two magical groups.</p>
+      </div>
+    {{/if}}
+    {{#if isMystic}}
+      <div class="sr5cm-box"><label class="inline">Power points bought (5 Karma each, max Magic)
+        <input type="number" min="0" data-dtype="Number" data-path="powerPoints" value="{{st.powerPoints}}"></label></div>
+    {{/if}}
+    {{#if hasSpellbook}}
+      <h3>Spells, rituals, complex forms &amp; powers</h3>
+      <div class="sr5cm-box sr5cm-derived">
+        {{#if isMagic}}{{#unless isAdept}}<span>Spells: <b>{{spellKarmaTxt}}</b></span>{{/unless}}{{/if}}
+        {{#if isTechno}}<span>Complex forms: <b>{{formKarmaTxt}}</b></span>{{/if}}
+        {{#if c.magic.ppAvail}}<span>Power points: <b>{{c.magic.ppUsed}} / {{c.magic.ppAvail}}</b></span>{{/if}}
+        {{#if isMagic}}{{#unless isAdept}}<p class="hint">{{spellNote}}.</p>{{/unless}}{{/if}}
+      </div>
+      <div class="sr5cm-split">
+        <div class="sr5cm-list" data-drop="magicItems">
+          {{#each magicItems}}
+          <div class="sr5cm-item" data-desc-uuid="{{uuid}}">
+            <img src="{{img}}"><span class="name">{{name}}</span><span class="tag">{{type}}</span>
+            {{#if isPower}}<label class="tiny">Lvl <input type="number" min="1" data-dtype="Number" data-path="magicItems.{{index}}.level" value="{{level}}"></label><span class="tag">{{pp}} PP</span>{{/if}}
+            <a data-action="removeRow" data-list="magicItems" data-index="{{index}}" data-tooltip="Remove"><i class="fa-solid fa-trash"></i></a>
+          </div>
+          {{else}}<p class="hint">Drag spells, complex forms or adept powers here, or add them from the browser.</p>{{/each}}
+        </div>
+        <div class="sr5cm-browser">
+          <div class="sr5cm-row"><input type="search" data-ui="magicSearch" value="{{ui.magicSearch}}" placeholder="Search…">
+            <select data-ui="magicType"><option value="">All allowed types</option>{{#each magicTypeOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></div>
+          <div class="sr5cm-filters">
+            <select data-ui="magicSource"><option value="">Any source</option>{{#each magicSourceOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+            {{#if hasSpells}}
+            <select data-ui="magicCategory"><option value="">Any category</option>{{#each magicCategoryOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+            <select data-ui="magicSpellType"><option value="">Mana or physical</option>{{#each magicSpellTypeOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+            <select data-ui="magicCombat"><option value="">Direct or indirect</option>{{#each magicCombatOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+            <select data-ui="magicRange"><option value="">Any range</option>{{#each magicRangeOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+            <select data-ui="magicDuration"><option value="">Any duration</option>{{#each magicDurationOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+            <select data-ui="magicDrain"><option value="">Any Drain</option>{{#each magicDrainOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+            {{/if}}
+            {{#if hasPowers}}
+            <select data-ui="magicPP"><option value="">Any PP cost</option>{{#each magicPPOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+            <select data-ui="magicActivation"><option value="">Active or passive</option>{{#each magicActivationOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+            {{/if}}
+          </div>
+          <p class="hint">{{resultCount}} match{{#if catalogLoading}} · loading compendiums…{{/if}}</p>
+          {{#each magicResults}}
+          <div class="sr5cm-item result" data-desc-uuid="{{uuid}}"><img src="{{img}}"><a class="name" data-action="openItem" data-uuid="{{uuid}}">{{name}}</a><span class="tag">{{extra}}</span><span class="src">{{source}}</span>
+            <a data-action="addCatalog" data-uuid="{{uuid}}" data-list="{{list}}" data-tooltip="Add to your build"><i class="fa-solid fa-plus"></i></a></div>
+          {{/each}}
+        </div>
+      </div>
+    {{/if}}
+  {{/if}}
+
+  {{!-- ============================================================ ATTRIBUTES --}}
+  {{#if step_attributes}}
+    <h2>Attributes {{#if isPriority}}<small>{{c.attrPtsUsed}}/{{c.attrPts}} points · special {{c.specialUsed}}/{{c.specialPts}}</small>{{/if}}</h2>
+    <p class="hint">Karma raises cost new rating × 5. Only one physical or mental attribute may be at its natural maximum.</p>
+    <table class="sr5cm-table">
+      <thead><tr><th>Attribute</th><th>Min/Max</th>{{#if isLM}}<th>Modules</th>{{/if}}{{#if isPriority}}<th data-tooltip="Points from your priorities">Points</th>{{/if}}<th data-tooltip="Ranks bought with Karma on top of points and bonuses">Karma ranks</th><th data-tooltip="Karma this row costs">Karma</th><th>Rating</th></tr></thead>
+      <tbody>
+      {{#each physical}}<tr class="{{#if atMax}}atmax{{/if}}">
+        <td data-tooltip="{{tip}}">{{label}}</td><td>{{min}}/{{max}}</td>{{#if ../isLM}}<td>{{#if bonus}}+{{bonus}}{{/if}}</td>{{/if}}
+        {{#if ../isPriority}}<td><input type="number" min="0" data-dtype="Number" data-path="{{ptsPath}}" value="{{pts}}"></td>{{/if}}
+        <td><input type="number" min="0" data-dtype="Number" data-path="{{karmaPath}}" value="{{karma}}"></td>
+        <td>{{karmaCost}}</td><td class="val">{{value}}</td>
+      </tr>{{/each}}
+      <tr class="sep"><td colspan="7"></td></tr>
+      {{#each mental}}<tr class="{{#if atMax}}atmax{{/if}}">
+        <td data-tooltip="{{tip}}">{{label}}</td><td>{{min}}/{{max}}</td>{{#if ../isLM}}<td>{{#if bonus}}+{{bonus}}{{/if}}</td>{{/if}}
+        {{#if ../isPriority}}<td><input type="number" min="0" data-dtype="Number" data-path="{{ptsPath}}" value="{{pts}}"></td>{{/if}}
+        <td><input type="number" min="0" data-dtype="Number" data-path="{{karmaPath}}" value="{{karma}}"></td>
+        <td>{{karmaCost}}</td><td class="val">{{value}}</td>
+      </tr>{{/each}}
+      <tr class="sep"><td colspan="7"></td></tr>
+      {{#each special}}
+      <tr>
+        <td>{{label}}</td><td>{{min}}/{{max}}</td>{{#if ../isLM}}<td>{{base}}</td>{{/if}}
+        {{#if ../isPriority}}<td><input type="number" min="0" data-dtype="Number" data-path="{{ptsPath}}" value="{{pts}}"></td>{{/if}}
+        <td><input type="number" min="0" data-dtype="Number" data-path="{{karmaPath}}" value="{{karma}}"></td>
+        <td>{{karmaCost}}</td><td class="val">{{value}}</td>
+      </tr>
+      {{/each}}
+      </tbody>
+    </table>
+    {{#if c.hasExceptional}}
+      <label class="inline">Exceptional Attribute applies to
+        <select data-path="exceptional"><option value="">—</option>{{#each exOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+    {{/if}}
+    <div class="sr5cm-box sr5cm-derived">
+      <span>Initiative <b>{{derived.initiative}}</b></span>
+      <span>Physical limit <b>{{derived.physicalLimit}}</b></span>
+      <span>Mental limit <b>{{derived.mentalLimit}}</b></span>
+      <span>Social limit <b>{{derived.socialLimit}}</b></span>
+      <span>Physical CM <b>{{derived.physicalCM}}</b></span>
+      <span>Stun CM <b>{{derived.stunCM}}</b></span>
+    </div>
+  {{/if}}
+
+  {{!-- ============================================================ QUALITIES --}}
+  {{#if step_qualities}}
+    <h2>Qualities <small>positive {{c.posQ}}/25 · negative {{c.negQ}}/25</small></h2>
+    {{#if metaTraits.length}}<p class="hint">Racial traits ({{#each metaTraits}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}) come with your metatype; add them as qualities only if you want them on the sheet as items.</p>{{/if}}
+    {{#if lmQualities.length}}<div class="sr5cm-box"><strong>From Life Modules (already paid, not counted against the 25 Karma limits):</strong> {{#each lmQualities}}{{name}} ({{karma}}){{#unless @last}}, {{/unless}}{{/each}}<p class="hint">To buy one off, add it here with a positive Karma cost equal to its value.</p></div>{{/if}}
+    <div class="sr5cm-split even" data-drop="qualities">
+      <div class="sr5cm-list">
+        <h4 class="pos">Positive <small>{{posRoom}} Karma of room</small></h4>
+        {{#each posQualities}}
+        <div class="sr5cm-item" data-desc-uuid="{{uuid}}">
+          <img src="{{img}}"><input class="name" type="text" data-path="qualities.{{index}}.name" value="{{name}}">
+          <label class="tiny">Karma <input type="number" data-dtype="Number" data-path="qualities.{{index}}.karma" value="{{karma}}"></label>
+          <label class="tiny">Rtg <input type="number" min="0" data-dtype="Number" data-path="qualities.{{index}}.rating" value="{{rating}}"></label>
+          <a data-action="removeRow" data-list="qualities" data-index="{{index}}" data-tooltip="Remove"><i class="fa-solid fa-trash"></i></a>
+        </div>
+        {{else}}<p class="hint">None yet.</p>{{/each}}
+      </div>
+      <div class="sr5cm-list">
+        <h4 class="neg">Negative <small>{{negRoom}} Karma of room</small></h4>
+        {{#each negQualities}}
+        <div class="sr5cm-item negative" data-desc-uuid="{{uuid}}">
+          <img src="{{img}}"><input class="name" type="text" data-path="qualities.{{index}}.name" value="{{name}}">
+          <label class="tiny">Karma <input type="number" data-dtype="Number" data-path="qualities.{{index}}.karma" value="{{karma}}"></label>
+          <label class="tiny">Rtg <input type="number" min="0" data-dtype="Number" data-path="qualities.{{index}}.rating" value="{{rating}}"></label>
+          <a data-action="removeRow" data-list="qualities" data-index="{{index}}" data-tooltip="Remove"><i class="fa-solid fa-trash"></i></a>
+        </div>
+        {{else}}<p class="hint">None yet. Negative qualities give Karma; enter custom ones as negative numbers.</p>{{/each}}
+      </div>
+    </div>
+    <button type="button" data-action="addRow" data-list="qualities" data-kind="quality"><i class="fa-solid fa-plus"></i> Custom quality</button>
+    <div class="sr5cm-row sr5cm-filters">
+      <input type="search" data-ui="qualitySearch" value="{{ui.qualitySearch}}" placeholder="Search qualities…">
+      <select data-ui="qualitySource"><option value="">Any source</option>{{#each qualitySourceOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+      <label class="inline"><input type="checkbox" data-ui="qualityShowAll" {{#if ui.qualityShowAll}}checked{{/if}}> Show qualities I can't take</label>
+      {{#if catalogLoading}}<span class="hint">Loading compendiums…</span>{{/if}}
+    </div>
+    <div class="sr5cm-split even">
+      <div class="sr5cm-browser">
+        <h4 class="pos">Positive <small>{{posCount}} shown{{#if hiddenPos}}, {{hiddenPos}} hidden (can't afford or don't qualify){{/if}}</small></h4>
+        {{#each posResults}}
+        <div class="sr5cm-item result {{#if unavailable}}unavailable{{/if}}" data-desc-uuid="{{uuid}}"><img src="{{img}}"><a class="name" data-action="openItem" data-uuid="{{uuid}}">{{name}}</a><span class="tag">{{extra}}</span><span class="src">{{source}}</span>
+          {{#if unavailable}}<span class="why" data-tooltip="{{reason}}">{{reason}}</span>{{else}}<a data-action="addCatalog" data-uuid="{{uuid}}" data-list="{{list}}" data-tooltip="Add to your build"><i class="fa-solid fa-plus"></i></a>{{/if}}</div>
+        {{/each}}
+      </div>
+      <div class="sr5cm-browser">
+        <h4 class="neg">Negative <small>{{negCount}} shown{{#if hiddenNeg}}, {{hiddenNeg}} hidden (over the limit or don't qualify){{/if}}</small></h4>
+        {{#each negResults}}
+        <div class="sr5cm-item result negative {{#if unavailable}}unavailable{{/if}}" data-desc-uuid="{{uuid}}"><img src="{{img}}"><a class="name" data-action="openItem" data-uuid="{{uuid}}">{{name}}</a><span class="tag">{{extra}}</span><span class="src">{{source}}</span>
+          {{#if unavailable}}<span class="why" data-tooltip="{{reason}}">{{reason}}</span>{{else}}<a data-action="addCatalog" data-uuid="{{uuid}}" data-list="{{list}}" data-tooltip="Add to your build"><i class="fa-solid fa-plus"></i></a>{{/if}}</div>
+        {{/each}}
+      </div>
+    </div>
+  {{/if}}
+
+  {{!-- ============================================================ SKILLS --}}
+  {{#if step_skills}}
+    <h2>Active Skills {{#if isPriority}}<small>skills {{c.skillPtsUsed}}/{{c.skillPts}} · groups {{c.groupPtsUsed}}/{{c.groupPts}}</small>{{/if}}</h2>
+    <p class="hint">Karma: new rating × 2 per skill, × 5 per group, 7 per specialization{{#if isPriority}} (a specialization costs 1 skill point){{/if}}. Maximum 6 (7 with Aptitude){{#if isLM}}; Life Module skills cap at 7{{/if}}.</p>
+    <h3>Skill groups</h3>
+    <table class="sr5cm-table">
+      <thead><tr><th>Group</th><th>Skills</th><th data-tooltip="Rating from Life Modules or your Magic/Resonance priority">Base</th>{{#if isPriority}}<th data-tooltip="Points from your priorities">Points</th>{{/if}}<th data-tooltip="Ranks bought with Karma on top of points and bonuses">Karma ranks</th><th data-tooltip="Karma this row costs">Karma</th><th>Rating</th></tr></thead>
+      <tbody>
+      {{#each groups}}
+      <tr class="{{#if broken}}broken{{/if}}">
+        <td data-tooltip="{{tip}}">{{name}}</td><td class="small">{{#each skills}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</td><td>{{base}}</td>
+        {{#if ../isPriority}}<td><input type="number" min="0" data-dtype="Number" data-path="{{ptsPath}}" value="{{pts}}"></td>{{/if}}
+        <td><input type="number" min="0" data-dtype="Number" data-path="{{karmaPath}}" value="{{karma}}"></td>
+        <td>{{karmaCost}}</td><td class="val">{{value}}{{#if broken}} <i class="fa-solid fa-link-slash" title="Broken group"></i>{{/if}}</td>
+      </tr>
+      {{/each}}
+      </tbody>
+    </table>
+    <h3>Skills</h3>
+    <table class="sr5cm-table">
+      <thead><tr><th>Skill</th><th>Attr</th><th>Group</th><th data-tooltip="Rating from Life Modules or your Magic/Resonance priority">Base</th>{{#if isPriority}}<th data-tooltip="Points from your priorities">Points</th>{{/if}}<th data-tooltip="Ranks bought with Karma on top of points and bonuses">Karma ranks</th><th>Specialization</th><th data-tooltip="Karma this row costs">Karma</th><th>Rating</th><th data-tooltip="Skill rating + linked attribute">Pool</th></tr></thead>
+      <tbody>
+      {{#each skillRows}}
+      <tr>
+        <td data-tooltip="{{tip}}">{{name}}</td><td>{{attrShort}}</td><td class="small">{{group}}{{#if groupVal}} ({{groupVal}}){{/if}}</td><td>{{base}}</td>
+        {{#if ../isPriority}}<td><input type="number" min="0" data-dtype="Number" data-path="{{ptsPath}}" value="{{pts}}"></td>{{/if}}
+        <td><input type="number" min="0" data-dtype="Number" data-path="{{karmaPath}}" value="{{karma}}"></td>
+        <td class="spec">
+          <input type="text" data-path="{{specPath}}" value="{{specText}}" placeholder="{{lmSpec}}">
+          {{#if ../isPriority}}<select data-path="{{specViaPath}}"><option value="points" {{#if specPoints}}selected{{/if}}>1 pt</option><option value="karma" {{#unless specPoints}}selected{{/unless}}>7 K</option></select>{{/if}}
+        </td>
+        <td>{{karmaCost}}</td><td class="val">{{value}}</td><td>{{pool}}</td>
+      </tr>
+      {{/each}}
+      </tbody>
+    </table>
+  {{/if}}
+
+  {{!-- ============================================================ KNOWLEDGE --}}
+  {{#if step_knowledge}}
+    <h2>Knowledge &amp; Languages <small>free points {{c.knowPts}}/{{c.freeKnow}}</small></h2>
+    <p class="hint">Free points = (Intuition + Logic) × 2. Beyond that, Karma = new rating × 1. One native language is free.</p>
+    <h3>Knowledge skills</h3>
+    <table class="sr5cm-table">
+      <thead><tr><th>Name</th><th>Type</th><th data-tooltip="Rating from Life Modules or your Magic/Resonance priority">Base</th><th data-tooltip="Free knowledge points: (Intuition + Logic) × 2">Free pts</th><th data-tooltip="Ranks bought with Karma on top of points and bonuses">Karma ranks</th><th>Spec.</th><th data-tooltip="Karma this row costs">Karma</th><th>Rating</th><th></th></tr></thead>
+      <tbody>
+      {{#each knowledgeRows}}
+      <tr>
+        {{#if path}}
+        <td><input type="text" data-path="{{path}}.name" value="{{name}}"></td>
+        <td><select data-path="{{path}}.type">{{#each typeOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></td>
+        <td>{{base}}</td>
+        <td><input type="number" min="0" data-dtype="Number" data-path="{{path}}.pts" value="{{pts}}"></td>
+        <td><input type="number" min="0" data-dtype="Number" data-path="{{path}}.karma" value="{{karma}}"></td>
+        <td><input type="text" data-path="{{path}}.spec" value="{{spec}}"></td>
+        <td>{{karmaCost}}</td><td class="val">{{value}}</td>
+        <td><a data-action="removeRow" data-list="knowledge" data-index="{{index}}"><i class="fa-solid fa-trash"></i></a></td>
+        {{else}}
+        <td>{{name}} <span class="tag">module</span></td><td>{{type}}</td><td>{{base}}</td><td colspan="4" class="hint">Add a row with the same name and type to raise it.</td><td class="val">{{value}}</td><td></td>
+        {{/if}}
+      </tr>
+      {{/each}}
+      </tbody>
+    </table>
+    <button type="button" data-action="addRow" data-list="knowledge" data-kind="knowledge"><i class="fa-solid fa-plus"></i> Knowledge skill</button>
+    <h3>Languages</h3>
+    <table class="sr5cm-table">
+      <thead><tr><th>Language</th><th>Native</th><th data-tooltip="Rating from Life Modules or your Magic/Resonance priority">Base</th><th data-tooltip="Free knowledge points: (Intuition + Logic) × 2">Free pts</th><th data-tooltip="Ranks bought with Karma on top of points and bonuses">Karma ranks</th><th data-tooltip="Karma this row costs">Karma</th><th>Rating</th><th></th></tr></thead>
+      <tbody>
+      {{#each languageRows}}
+      <tr>
+        {{#if path}}
+        <td><input type="text" data-path="{{path}}.name" value="{{name}}"></td>
+        <td><input type="checkbox" data-path="{{path}}.native" {{#if native}}checked{{/if}}></td>
+        <td>{{base}}</td>
+        <td>{{#unless native}}<input type="number" min="0" data-dtype="Number" data-path="{{path}}.pts" value="{{pts}}">{{/unless}}</td>
+        <td>{{#unless native}}<input type="number" min="0" data-dtype="Number" data-path="{{path}}.karma" value="{{karma}}">{{/unless}}</td>
+        <td>{{karmaCost}}</td><td class="val">{{#if native}}N{{else}}{{value}}{{/if}}</td>
+        <td><a data-action="removeRow" data-list="languages" data-index="{{index}}"><i class="fa-solid fa-trash"></i></a></td>
+        {{else}}
+        <td>{{name}} <span class="tag">module</span></td><td>{{#if native}}✔{{/if}}</td><td>{{base}}</td><td colspan="3" class="hint">Add a row with the same name to raise it.</td><td class="val">{{#if native}}N{{else}}{{value}}{{/if}}</td><td></td>
+        {{/if}}
+      </tr>
+      {{/each}}
+      </tbody>
+    </table>
+    <button type="button" data-action="addRow" data-list="languages" data-kind="language"><i class="fa-solid fa-plus"></i> Language</button>
+  {{/if}}
+
+  {{!-- ============================================================ RESOURCES --}}
+  {{#if step_resources}}
+    <h2>Resources &amp; Gear <small>{{nuyenLeftTxt}} left</small></h2>
+    <div class="sr5cm-box sr5cm-derived">
+      <span>Available <b>{{nuyenStartTxt}}</b></span>
+      <span>Gear <b>{{gearCostTxt}}</b></span>
+      <span>Lifestyle <b>{{lifestyleCostTxt}}</b></span>
+      <span>Essence <b>{{c.essence}}</b></span>
+      <label class="inline">Karma → nuyen (2,000¥ each, max {{c.maxNuyenKarma}})
+        <input type="number" min="0" max="{{c.maxNuyenKarma}}" data-dtype="Number" data-path="nuyenKarma" value="{{st.nuyenKarma}}"></label>
+    </div>
+    <div class="sr5cm-box">
+      <div class="sr5cm-row">
+        <label class="inline">Lifestyle <select data-path="lifestyle.type">{{#each lifestyleOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+        <label class="inline">Months <input type="number" min="0" data-dtype="Number" data-path="lifestyle.months" value="{{st.lifestyle.months}}"></label>
+        <label class="inline">Name <input type="text" data-path="lifestyle.name" value="{{st.lifestyle.name}}" placeholder="e.g. Coffin hotel in Redmond"></label>
+      </div>
+      <div class="sr5cm-row">
+        <span>Starting nuyen ({{startingDice}}): <b>{{startingNuyenTxt}}</b></span>
+        <button type="button" data-action="rollNuyen" data-tooltip="Roll starting nuyen for your lifestyle and post it to chat"><i class="fa-solid fa-dice"></i> Roll</button>
+        <span class="hint">Added to the up to 5,000¥ you carry over (SR5 p.95).</span>
+      </div>
+    </div>
+    <div class="sr5cm-split">
+      <div class="sr5cm-list" data-drop="gear">
+        {{#each gearRows}}
+        <div class="sr5cm-item gear" data-desc-uuid="{{uuid}}">
+          <img src="{{img}}"><input class="name" type="text" data-path="gear.{{index}}.name" value="{{name}}">
+          <span class="tag">{{type}}</span>
+          <label class="tiny">Qty <input type="number" min="1" data-dtype="Number" data-path="gear.{{index}}.qty" value="{{qty}}"></label>
+          <label class="tiny">Rtg <input type="number" min="0" data-dtype="Number" data-path="gear.{{index}}.rating" value="{{rating}}"></label>
+          <label class="tiny">¥ <input type="number" min="0" data-dtype="Number" data-path="gear.{{index}}.cost" value="{{cost}}"></label>
+          <label class="tiny">Avail <input type="text" data-path="gear.{{index}}.avail" value="{{avail}}"></label>
+          {{#if isWare}}
+          <label class="tiny">Ess <input type="number" step="0.01" min="0" data-dtype="Number" data-path="gear.{{index}}.essence" value="{{essence}}"></label>
+          <select data-path="gear.{{index}}.grade">{{#each gradeOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+          {{/if}}
+          <span class="total">{{totalCost}}¥{{#if isWare}} · {{totalEssence}} Ess{{/if}}</span>
+          <a data-action="removeRow" data-list="gear" data-index="{{index}}" data-tooltip="Remove"><i class="fa-solid fa-trash"></i></a>
+        </div>
+        {{else}}<p class="hint">Drag gear, weapons, armor, cyberware and bioware here or add them from the browser. Rated items list a cost of 0 in the compendium; enter the price for the rating you buy.</p>{{/each}}
+        <button type="button" data-action="addRow" data-list="gear" data-kind="gear"><i class="fa-solid fa-plus"></i> Custom item</button>
+      </div>
+      <div class="sr5cm-browser">
+        <div class="sr5cm-row"><input type="search" data-ui="gearSearch" value="{{ui.gearSearch}}" placeholder="Search gear…">
+          <select data-ui="gearType">{{#each gearTypeOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></div>
+        {{#if catalogLoading}}<p class="hint">Loading compendiums…</p>{{/if}}
+        {{#each gearResults}}
+        <div class="sr5cm-item result" data-desc-uuid="{{uuid}}"><img src="{{img}}"><a class="name" data-action="openItem" data-uuid="{{uuid}}">{{name}}</a><span class="tag">{{extra}}</span><span class="src">{{source}}</span>
+          <a data-action="addCatalog" data-uuid="{{uuid}}" data-list="{{list}}" data-tooltip="Add to your build"><i class="fa-solid fa-plus"></i></a></div>
+        {{/each}}
+      </div>
+    </div>
+  {{/if}}
+
+  {{!-- ============================================================ CONTACTS --}}
+  {{#if step_contacts}}
+    <h2>Contacts <small>{{c.contactCost}} Karma used · {{c.freeContact}} free</small></h2>
+    <p class="hint">Each contact costs Connection + Loyalty Karma. You get Charisma × {{c.level.contactMult}} free; the rest comes from your Karma.</p>
+    <table class="sr5cm-table">
+      <thead><tr><th>Name</th><th>Type</th><th data-tooltip="How influential the contact is (1–12)">Connection</th><th data-tooltip="How much the contact cares about you (1–6)">Loyalty</th><th>Notes</th><th>Cost</th><th></th></tr></thead>
+      <tbody>
+      {{#each contactRows}}
+      <tr>
+        <td><input type="text" data-path="contacts.{{index}}.name" value="{{name}}"></td>
+        <td><input type="text" data-path="contacts.{{index}}.type" value="{{type}}" placeholder="Fixer, Street Doc…"></td>
+        <td><input type="number" min="1" max="12" data-dtype="Number" data-path="contacts.{{index}}.connection" value="{{connection}}"></td>
+        <td><input type="number" min="1" max="6" data-dtype="Number" data-path="contacts.{{index}}.loyalty" value="{{loyalty}}"></td>
+        <td><input type="text" data-path="contacts.{{index}}.notes" value="{{notes}}"></td>
+        <td>{{cost}}</td>
+        <td><a data-action="removeRow" data-list="contacts" data-index="{{index}}"><i class="fa-solid fa-trash"></i></a></td>
+      </tr>
+      {{/each}}
+      </tbody>
+    </table>
+    <button type="button" data-action="addRow" data-list="contacts" data-kind="contact"><i class="fa-solid fa-plus"></i> Contact</button>
+  {{/if}}
+
+  {{!-- ============================================================ REVIEW --}}
+  {{#if step_review}}
+    <h2>Final Review — {{#if st.name}}{{st.name}}{{else}}unnamed runner{{/if}}</h2>
+    <div class="sr5cm-box">
+      <p><strong>{{c.meta.label}}</strong> · {{c.awakened.label}} · {{c.level.label}}</p>
+      <table class="sr5cm-mini"><tr>{{#each reviewAttrs}}<th>{{label}}</th>{{/each}}<th>Essence</th></tr><tr>{{#each reviewAttrs}}<td>{{value}}</td>{{/each}}<td>{{c.essence}}</td></tr></table>
+      <p><strong>Skills:</strong> {{reviewSkills}}</p>
+      <p><strong>Skill groups:</strong> {{reviewGroups}}</p>
+      <p><strong>Knowledge:</strong> {{reviewKnow}}</p>
+      <p><strong>Languages:</strong> {{reviewLang}}</p>
+      <p><strong>Qualities:</strong> {{reviewQualities}}</p>
+    </div>
+    <div class="sr5cm-box sr5cm-derived">
+      <span>Initiative <b>{{derived.initiative}}</b></span>
+      <span>Limits <b>P{{derived.physicalLimit}} M{{derived.mentalLimit}} S{{derived.socialLimit}}</b></span>
+      <span>Condition <b>{{derived.physicalCM}} / {{derived.stunCM}}</b></span>
+      <span>Composure <b>{{derived.composure}}</b></span>
+      <span>Judge Intentions <b>{{derived.judgeIntentions}}</b></span>
+      <span>Memory <b>{{derived.memory}}</b></span>
+    </div>
+    <div class="sr5cm-box">
+      <h3>Karma ledger</h3>
+      <table class="sr5cm-mini ledger">
+        <tr><td>Starting Karma</td><td>{{c.karma.start}}</td></tr>
+        {{#each karmaLines}}<tr><td>{{label}}</td><td>{{txt}}</td></tr>{{/each}}
+        <tr class="total"><td>Remaining (carried over: {{c.karma.carry}})</td><td>{{c.karma.left}}</td></tr>
+      </table>
+      <p>Nuyen carried over: <b>{{nuyenCarryTxt}}</b>{{#if st.startingNuyen}} + starting roll {{st.startingNuyen}}¥{{/if}}</p>
+    </div>
+    <label>Notes for the sheet <textarea data-path="notes" rows="3">{{st.notes}}</textarea></label>
+    <button type="button" class="sr5cm-create" data-action="createActor" {{#unless canCreate}}disabled{{/unless}}><i class="fa-solid fa-user-check"></i> Create character</button>
+    {{#unless canCreate}}<p class="hint">Resolve the errors in the summary panel to enable creation.</p>{{/unless}}
+  {{/if}}
+  </section>
+
+  <aside class="sr5cm-side">
+    <h3>Budget</h3>
+    <ul class="sr5cm-budget">
+      {{#each budgets}}<li class="{{#if bad}}bad{{/if}} {{#if ok}}ok{{/if}}" data-tooltip="{{tip}}"><span>{{label}}</span><b>{{value}}</b></li>{{/each}}
+    </ul>
+    {{#if errors.length}}
+    <h3 class="err">Errors ({{errors.length}})</h3>
+    <ul class="sr5cm-msgs err">{{#each errors}}<li>{{this}}</li>{{/each}}</ul>
+    {{/if}}
+    {{#if warnings.length}}
+    <h3 class="warn">Warnings ({{warnings.length}})</h3>
+    <ul class="sr5cm-msgs warn">{{#each warnings}}<li>{{this}}</li>{{/each}}</ul>
+    {{/if}}
+    {{#unless errors.length}}{{#unless warnings.length}}<p class="ok">Build is valid.</p>{{/unless}}{{/unless}}
+  </aside>
+
+  <footer class="sr5cm-footer">
+    <button type="button" data-action="prevStep" {{#if isFirst}}disabled{{/if}}><i class="fa-solid fa-chevron-left"></i> Back</button>
+    <span class="karma">Karma left: <b>{{c.karma.left}}</b></span>
+    <button type="button" data-action="nextStep" {{#if isLast}}disabled{{/if}}>Next <i class="fa-solid fa-chevron-right"></i></button>
+  </footer>
+</div>

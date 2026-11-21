@@ -1,0 +1,43 @@
+# Push a tag such as v0.1.5 to publish a release.
+# The release carries module.json (the manifest Foundry installs from) and module.zip.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches module.json
+        run: |
+          VERSION=$(jq -r .version module.json)
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "module.json is $VERSION but the tag is $GITHUB_REF_NAME"; exit 1
+          fi
+          if [ "$(jq -r .download module.json)" != "https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/module.zip" ]; then
+            echo "module.json download does not point to this release"; exit 1
+          fi
+
+      - name: Build module.zip
+        run: zip -r module.zip module.json README.md LICENSE assets lang scripts styles templates
+
+      - name: Release notes from the README
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          awk -v h="# v $V" '$0==h{f=1;next} /^# v /{f=0} f' README.md > notes.md
+          cat notes.md
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body_path: notes.md
+          files: |
+            module.json
+            module.zip
